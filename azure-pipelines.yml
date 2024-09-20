@@ -1,0 +1,64 @@
+parameters:
+- name: browser
+  displayName: 'Browser for UI tests'
+  type: string
+  default: 'chrome'
+  values:
+  - chrome
+  - firefox
+  - edge
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  - main
+
+schedules:
+  - cron: "0 21 * * *"  # 9 PM UTC every day
+    displayName: "Nightly build"
+    branches:
+      include: 
+        - main
+    always: true
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+jobs:
+  - job: APITests
+    steps:
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'test'
+          projects: '**/TAF_Task_API.csproj'
+          arguments: '--configuration $(buildConfiguration)'
+
+  - job: UITests
+    dependsOn: APITests
+    condition: succeededOrFailed()
+    steps:
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'test'
+          projects: '**/TAF_Task.csproj'
+          arguments: '--configuration $(buildConfiguration) -e UI_TEST=true -e BROWSER=${{ parameters.browser }}'
+
+  - job: PublishResults
+    dependsOn:
+      - APITests
+      - UITests
+    condition: succeededOrFailed()
+    steps:
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '**/*.trx'
+          failTaskOnFailedTests: true
+      - upload: '**/screenshots'
+        artifact: Screenshots
