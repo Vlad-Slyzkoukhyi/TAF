@@ -7,7 +7,7 @@ parameters:
   - chrome
   - firefox
   - edge
- 
+  
 trigger:
   branches:
     include:
@@ -20,7 +20,7 @@ schedules:
   - cron: "0 21 * * *"
     displayName: "Nightly build"
     branches:
-      include: 
+      include:
         - main
     always: true
 
@@ -31,34 +31,44 @@ variables:
   buildConfiguration: 'Release'
 
 jobs:
-  - job: APITests
+  - job: Setup_and_Test
+    displayName: 'Setup, Build and Test API'
     steps:
-      - task: DotNetCoreCLI@2
+      - task: UseDotNet@2
         inputs:
-          command: 'test'
-          projects: '**/TAF_Task_API.csproj'
-          arguments: '--configuration $(buildConfiguration)'
-
-  - job: UITests
-    dependsOn: APITests
-    condition: succeededOrFailed()
-    steps:
-      - task: DotNetCoreCLI@2
+          version: '5.x'
+          packageType: 'sdk'
+      
+      - task: UseDotNet@2
         inputs:
-          command: 'test'
-          projects: '**/TAF_Task.csproj'
-          arguments: '--configuration $(buildConfiguration) -e UI_TEST=true -e BROWSER=${{ parameters.browser }}'
+          version: '5.x'
+          packageType: 'runtime'
+      
+      - script: dotnet restore ./TAF_Task_API/TAF_Task_API.csproj
+        displayName: 'Restore Packages'
 
-  - job: PublishResults
-    dependsOn:
-    - APITests
-    - UITests
-    condition: succeededOrFailed()
-    steps:
+      - script: dotnet build ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
+        displayName: 'Build API Project'
+
+      - script: dotnet test ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=test_results.trx"
+        displayName: 'Run API Tests'
+        
       - task: PublishTestResults@2
+        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/*.trx'
-          failTaskOnFailedTests: true
+
+      - script: dotnet test ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
+        displayName: 'Run UI Tests'
+        condition: and(succeeded(), ne('${{ parameters.browser }}', ''))
+        
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '**/ui_test_results.trx'
+
       - upload: '**/screenshots'
+        condition: and(succeeded(), ne('${{ parameters.browser }}', ''))
         artifact: Screenshots
