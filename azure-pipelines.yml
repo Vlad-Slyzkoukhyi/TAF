@@ -7,14 +7,16 @@ parameters:
   - chrome
   - firefox
   - edge
-  
+
 trigger:
   branches:
     include:
       - main
 
 pr:
-  - main
+  branches:
+    include:
+      - main
 
 schedules:
   - cron: "0 21 * * *"
@@ -31,8 +33,8 @@ variables:
   buildConfiguration: 'Release'
 
 jobs:
-  - job: Setup_and_Test
-    displayName: 'Setup, Build and Test API'
+  - job: APITests
+    displayName: 'Execute API Tests'
     steps:
       - task: UseDotNet@2
         inputs:
@@ -43,32 +45,53 @@ jobs:
         inputs:
           version: '5.x'
           packageType: 'runtime'
-      
+
       - script: dotnet restore ./TAF_Task_API/TAF_Task_API.csproj
-        displayName: 'Restore Packages'
+        displayName: 'Restore API Packages'
 
       - script: dotnet build ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
         displayName: 'Build API Project'
 
-      - script: dotnet test ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=test_results.trx"
-        displayName: 'Run API Tests'
-        
+      - script: dotnet test ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=api_test_results.trx"
+        displayName: 'Test API Project'
+
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'VSTest'
-          testResultsFiles: '**/*.trx'
-
-      - script: dotnet test ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
-        displayName: 'Run UI Tests'
-        condition: and(succeeded(), ne('${{ parameters.browser }}', ''))
+          testResultsFiles: '**/api_test_results.trx'
+        displayName: 'Publish API Test Results'
         
+  - job: UITests
+    displayName: 'Execute UI Tests'
+    dependsOn: APITests
+    condition: succeededOrFailed()
+    steps:
+      - task: UseDotNet@2
+        inputs:
+          version: '5.x'
+          packageType: 'sdk'
+      
+      - task: UseDotNet@2
+        inputs:
+          version: '5.x'
+          packageType: 'runtime'
+
+      - script: dotnet restore ./TAF_Task/TAF_Task.csproj
+        displayName: 'Restore UI Packages'
+
+      - script: dotnet build ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore
+        displayName: 'Build UI Project'
+
+      - script: dotnet test ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
+        displayName: 'Test UI Project'
+
       - task: PublishTestResults@2
-        condition: succeededOrFailed()
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/ui_test_results.trx'
+        displayName: 'Publish UI Test Results'
 
       - upload: '**/screenshots'
-        condition: and(succeeded(), ne('${{ parameters.browser }}', ''))
+        condition: succeeded()
+        displayName: 'Upload Screenshots'
         artifact: Screenshots
