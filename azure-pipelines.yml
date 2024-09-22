@@ -38,12 +38,12 @@ jobs:
     steps:
       - task: UseDotNet@2
         inputs:
-          version: '5.x'
+          version: '8.0.x'
           packageType: 'sdk'
       
       - task: UseDotNet@2
         inputs:
-          version: '5.x'
+          version: '8.0.x'
           packageType: 'runtime'
 
       - script: dotnet restore TAF_Task/TAF_Task_API/TAF_Task_API.csproj
@@ -68,12 +68,12 @@ jobs:
     steps:
       - task: UseDotNet@2
         inputs:
-          version: '5.x'
+          version: '8.0.x'
           packageType: 'sdk'
       
       - task: UseDotNet@2
         inputs:
-          version: '5.x'
+          version: '8.0.x'
           packageType: 'runtime'
 
       - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
