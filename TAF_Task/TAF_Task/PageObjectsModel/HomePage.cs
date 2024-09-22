@@ -20,7 +20,7 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.LinkText, Using = "Careers")]
         private readonly IWebElement? _careersPage;
 
-        [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-iconheader-search__search-icon")]
+        [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-icon.header-search__search-icon")]
         private readonly IWebElement? _magnifierIcon;
 
         [FindsBy(How = How.Id, Using = "new_form_search")]
