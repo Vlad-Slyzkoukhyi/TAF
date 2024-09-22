@@ -7,7 +7,7 @@ parameters:
   - chrome
   - firefox
   - edge
-
+ 
 trigger:
   branches:
     include:
@@ -17,7 +17,7 @@ pr:
   - main
 
 schedules:
-  - cron: "0 21 * * *"  # 9 PM UTC every day
+  - cron: "0 21 * * *"
     displayName: "Nightly build"
     branches:
       include: 
@@ -51,8 +51,8 @@ jobs:
 
   - job: PublishResults
     dependsOn:
-      - APITests
-      - UITests
+    - APITests
+    - UITests
     condition: succeededOrFailed()
     steps:
       - task: PublishTestResults@2
