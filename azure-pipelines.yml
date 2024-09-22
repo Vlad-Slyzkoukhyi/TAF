@@ -46,13 +46,13 @@ jobs:
           version: '5.x'
           packageType: 'runtime'
 
-      - script: dotnet restore ./TAF_Task_API/TAF_Task_API.csproj
+      - script: dotnet restore TAF_Task/TAF_Task_API/TAF_Task_API.csproj
         displayName: 'Restore API Packages'
 
-      - script: dotnet build ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
+      - script: dotnet build TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
         displayName: 'Build API Project'
 
-      - script: dotnet test ./TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=api_test_results.trx"
+      - script: dotnet test TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=api_test_results.trx"
         displayName: 'Test API Project'
 
       - task: PublishTestResults@2
@@ -76,13 +76,13 @@ jobs:
           version: '5.x'
           packageType: 'runtime'
 
-      - script: dotnet restore ./TAF_Task/TAF_Task.csproj
+      - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
         displayName: 'Restore UI Packages'
 
-      - script: dotnet build ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore
+      - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore
         displayName: 'Build UI Project'
 
-      - script: dotnet test ./TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
+      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
         displayName: 'Test UI Project'
 
       - task: PublishTestResults@2
