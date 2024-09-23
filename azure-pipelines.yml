@@ -14,13 +14,15 @@ trigger:
       - main
 
 pr:
-  - main
+  branches:
+    include:
+      - main
 
 schedules:
-  - cron: "0 21 * * *"  # 9 PM UTC every day
+  - cron: "0 21 * * *"
     displayName: "Nightly build"
     branches:
-      include: 
+      include:
         - main
     always: true
 
@@ -32,33 +34,64 @@ variables:
 
 jobs:
   - job: APITests
+    displayName: 'Execute API Tests'
     steps:
-      - task: DotNetCoreCLI@2
+      - task: UseDotNet@2
         inputs:
-          command: 'test'
-          projects: '**/TAF_Task_API.csproj'
-          arguments: '--configuration $(buildConfiguration)'
-
-  - job: UITests
-    dependsOn: APITests
-    condition: succeededOrFailed()
-    steps:
-      - task: DotNetCoreCLI@2
+          version: '8.0.x'
+          packageType: 'sdk'
+      
+      - task: UseDotNet@2
         inputs:
-          command: 'test'
-          projects: '**/TAF_Task.csproj'
-          arguments: '--configuration $(buildConfiguration) -e UI_TEST=true -e BROWSER=${{ parameters.browser }}'
+          version: '8.0.x'
+          packageType: 'runtime'
 
-  - job: PublishResults
-    dependsOn:
-      - APITests
-      - UITests
-    condition: succeededOrFailed()
-    steps:
+      - script: dotnet restore TAF_Task/TAF_Task_API/TAF_Task_API.csproj
+        displayName: 'Restore API Packages'
+
+      - script: dotnet build TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
+        displayName: 'Build API Project'
+
+      - script: dotnet test TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=api_test_results.trx"
+        displayName: 'Test API Project'
+
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
-          testResultsFiles: '**/*.trx'
-          failTaskOnFailedTests: true
+          testResultsFiles: '**/api_test_results.trx'
+        displayName: 'Publish API Test Results'
+        
+  - job: UITests
+    displayName: 'Execute UI Tests'
+    dependsOn: APITests
+    condition: succeededOrFailed()
+    steps:
+      - task: UseDotNet@2
+        inputs:
+          version: '8.0.x'
+          packageType: 'sdk'
+      
+      - task: UseDotNet@2
+        inputs:
+          version: '8.0.x'
+          packageType: 'runtime'
+
+      - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
+        displayName: 'Restore UI Packages'
+
+      - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore
+        displayName: 'Build UI Project'
+
+      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
+        displayName: 'Test UI Project'
+
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '**/ui_test_results.trx'
+        displayName: 'Publish UI Test Results'
+
       - upload: '**/screenshots'
+        condition: succeeded()
+        displayName: 'Upload Screenshots'
         artifact: Screenshots
