@@ -6,7 +6,7 @@ namespace TAF_Task.ScreenShots
 {
     internal static class ScreenshotTaker
     {
-        public static string ScreenShotPath => @"E:\Study\EPAM\TAF\TAF_Task\TAF_Task\Screenshots\TestFailScreenshots\";
+        public static string ScreenShotPath => @"E:\Study\EPAM\Automated Testing\CI_CD\TAF_Task\TAF_Task\Screenshots\TestFailScreenshots\";
         internal static void TakeScreenshot(IWebDriver? driver, string? testName, string? folderPath)
         {
             if (!Directory.Exists(folderPath) && folderPath != null)
