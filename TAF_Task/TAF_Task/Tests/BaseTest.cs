@@ -38,19 +38,27 @@ namespace TAF_Task.Tests
         [TearDown]
         public void TearDown()
         {
-            try
+            if (Driver != null)
             {
-                if (TestContext.CurrentContext.Result.Outcome != ResultState.Success)
+                try
                 {
-                    string screenshotsDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "Screenshots");
-                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName, screenshotsDirectory);
+                    var outcome = TestContext.CurrentContext.Result.Outcome; 
+                    if (!outcome.Equals(ResultState.Success)) 
+                    {
+                        string screenshotsDirectory = Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
+                        ScreenshotTaker.TakeScreenshot(Driver, TestContext.CurrentContext.Test.Name, screenshotsDirectory);
+                    }
                 }
-            }
-            finally
-            {
-                Log.Info("Browser closed");
-                Driver?.Dispose();
-                Driver?.Quit();
+                catch (Exception ex)
+                {                   
+                    Log.Error("Error taking screenshot or during TearDown", ex);
+                }
+                finally
+                {
+                    Log.Info("Closing Browser");
+                    Driver.Dispose();
+                    Driver.Quit();
+                }
             }
         }
 

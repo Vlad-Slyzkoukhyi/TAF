@@ -8,22 +8,32 @@ namespace TAF_Task.ScreenShots
 {
     public static class ScreenshotTaker
     {
-        internal static void TakeScreenshot(IWebDriver driver, string testName, string folderPath)
+        public static void TakeScreenshot(IWebDriver driver, string testName, string folderPath)
         {
-            if (!Directory.Exists(folderPath))
+            try
             {
-                Directory.CreateDirectory(folderPath);
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                string sanitizedTestName = SanitizeFilename(testName);
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                string screenFileName = $"{sanitizedTestName}_{timestamp}.jpeg";
+                string screenPath = Path.Combine(folderPath, screenFileName);
+
+                Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                screenshot.SaveAsFile(screenPath);
             }
-
-            string screenFileName =
-                $"{testName} {DateTime.Now:dd,MM}.{ImageFormat.Jpeg.ToString().ToLowerInvariant()}";
-
-            string screenPath = Path.Combine(TestContext.Parameters.Get("ScreenShotPath").ToString(), screenFileName);
-
-            using (Image screenshot = Image.FromStream(new MemoryStream(((ITakesScreenshot)driver).GetScreenshot().AsByteArray)))
+            catch (Exception ex)
             {
-                screenshot.Save(screenPath);
+                throw new InvalidOperationException("Failed to capture screenshot.", ex);
             }
+        }
+
+        private static string SanitizeFilename(string filename)
+        {
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var cleanFilename = new string(filename.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
+            return cleanFilename;
         }
     }
 }
