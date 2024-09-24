@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TAF_Task_API.BusinessLayer
+namespace TAF_API.BusinessLayer
 {
     public class Geo
     {
-        public string lat { get; set; }
-        public string lng { get; set; }
+        public string? Lat { get; set; }
+        public string? Lng { get; set; }
     }
 }
