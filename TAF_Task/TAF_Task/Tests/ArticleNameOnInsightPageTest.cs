@@ -18,8 +18,6 @@ namespace TAF_Task.Tests
         [SetUp]
         public void LocalSetUp()
         {
-            _homePage = new HomePage(Driver);
-            _insightPage = new InsightsPage(Driver);
             AppSettings? appSettings = GetAppSettings();
             _baseUrl = appSettings?.BaseUrl;
 
@@ -30,14 +28,16 @@ namespace TAF_Task.Tests
         [Test]        
         public void CheckArticleName()
         {
-            _homePage?.AcceptCookieButton();
-            _homePage?.ClickInsightsPage();
-            _insightPage?.ClickSwipeRightButtonWithWait1000();
-            _insightPage?.ClickSwipeRightButtonWithWait1000();
-            _insightPage?.GetActiveArticleName();
-            _insightPage?.ClickReadMoreActiveArticle();
-            _insightPage?.GetArticleName();
-            _insightPage?.CheckArcticleName();
+            _homePage = new HomePage(Driver);
+            _homePage.AcceptCookieButton();
+            _homePage.ClickInsightsPage();
+            _insightPage = new InsightsPage(Driver);
+            _insightPage.ClickSwipeRightButtonWithWait1000();
+            _insightPage.ClickSwipeRightButtonWithWait1000();
+            _insightPage.GetActiveArticleName();
+            _insightPage.ClickReadMoreActiveArticle();
+            _insightPage.GetArticleName();
+            _insightPage.CheckArcticleName();
         }
     }
 }
