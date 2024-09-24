@@ -40,13 +40,14 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='About']")]
         private readonly IWebElement? _aboutPage;
 
-        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']")]
-        private readonly IWebElement? _insightsPage;
+        //[FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']")]
+        //private readonly IWebElement? _insightsPage;
 
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
         private readonly IList<IWebElement>? _searchRequestWordResult;
 
         private readonly By? _searchResults = By.ClassName("search-results__items");
+        private readonly By? _insightsPage = By.XPath("//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']");
 
         public void ClickCareersPage()
         {
@@ -70,8 +71,10 @@ namespace TAF_Task.PageObjectsModel
 
         public void ClickInsightsPage()
         {
+            Wait.Until(ExpectedConditions.ElementIsVisible(_insightsPage));
             Wait.Until(ExpectedConditions.ElementToBeClickable(_insightsPage));
-            _insightsPage?.Click();
+            IWebElement _insightsPageElement = Driver.FindElement(_insightsPage);
+            _insightsPageElement?.Click();
             Log.Info("Insights page is open");
         }   
 
