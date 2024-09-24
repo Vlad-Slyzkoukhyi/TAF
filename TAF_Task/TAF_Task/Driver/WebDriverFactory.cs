@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
@@ -26,15 +27,32 @@ namespace TAF_Task.Driver
             switch (browserType)
             {
                 case BrowserType.Chrome:
-                    var options = new ChromeOptions();                    
+                    var chromOptions = new ChromeOptions();                    
                     if (settings.Headless)
-                        options.AddArguments("--headless");
+                        chromOptions.AddArguments("--headless");
                     if (settings.MaximizeWindow)
-                        options.AddArgument("--start-maximized");
+                        chromOptions.AddArgument("--start-maximized");
 
-                    return new ChromeDriver(options);
+                    return new ChromeDriver(chromOptions);
+
                 case BrowserType.Firefox:
-                    return new FirefoxDriver();
+                    var firefoxOptions = new FirefoxOptions();
+                    if (settings.Headless)
+                        firefoxOptions.AddArgument("-headless");  // Notice Firefox uses "-headless"
+                    if (settings.MaximizeWindow)
+                        firefoxOptions.AddArgument("--window-size=1920,1080");
+
+                    return new FirefoxDriver(firefoxOptions);
+
+                case BrowserType.Edge:
+                    var edgeOptions = new EdgeOptions();
+                    if (settings.Headless)
+                        edgeOptions.AddArguments("--headless");
+                    if (settings.MaximizeWindow)
+                        edgeOptions.AddArgument("--start-maximized");
+
+                    return new EdgeDriver(edgeOptions);
+
                 default:
                     throw new ArgumentException("Unsupported browser type or configuration.");
             }
@@ -44,6 +62,7 @@ namespace TAF_Task.Driver
     public enum BrowserType
     {
         Chrome,
-        Firefox
+        Firefox,
+        Edge
     }
 }
