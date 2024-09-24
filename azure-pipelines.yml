@@ -1,13 +1,3 @@
-parameters:
-- name: browser
-  displayName: 'Browser for UI tests'
-  type: string
-  default: 'chrome'
-  values:
-  - chrome
-  - firefox
-  - edge
-
 trigger:
   branches:
     include:
@@ -30,12 +20,13 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'
+  buildConfiguration: 'Debug'
 
 jobs:
   - job: APITests
     displayName: 'Execute API Tests'
     steps:
+    
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
@@ -49,10 +40,10 @@ jobs:
       - script: dotnet restore TAF_Task/TAF_Task_API/TAF_Task_API.csproj
         displayName: 'Restore API Packages'
 
-      - script: dotnet build TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore
+      - script: dotnet build TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration)
         displayName: 'Build API Project'
 
-      - script: dotnet test TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=api_test_results.trx"
+      - script: dotnet test TAF_Task/TAF_Task_API/TAF_Task_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
         displayName: 'Test API Project'
 
       - task: PublishTestResults@2
@@ -60,7 +51,7 @@ jobs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/api_test_results.trx'
         displayName: 'Publish API Test Results'
-        
+
   - job: UITests
     displayName: 'Execute UI Tests'
     dependsOn: APITests
@@ -79,11 +70,14 @@ jobs:
       - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
         displayName: 'Restore UI Packages'
 
-      - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore
+      - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration)
         displayName: 'Build UI Project'
 
-      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --no-restore --no-build --logger "trx;LogFileName=ui_test_results.trx" -e UI_TEST=true -e BROWSER=${{ parameters.browser }}
+      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx"
         displayName: 'Test UI Project'
+        env:
+          UI_TEST: true
+          BROWSER: 'chrome'
 
       - task: PublishTestResults@2
         inputs:
@@ -91,7 +85,10 @@ jobs:
           testResultsFiles: '**/ui_test_results.trx'
         displayName: 'Publish UI Test Results'
 
-      - upload: '**/screenshots'
+      - script: mkdir -p "$(System.DefaultWorkingDirectory)/Screenshots"
+        displayName: 'Create Screenshots Directory'
+
+      - upload: '**/Screenshots'
         condition: succeeded()
         displayName: 'Upload Screenshots'
         artifact: Screenshots
