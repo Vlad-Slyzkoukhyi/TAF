@@ -33,6 +33,7 @@ namespace TAF_Task.Tests
         public void TestCheckFileDownload(string fileName)
         {
             _homePage.AcceptCookieButton();
+            _homePage.ClickMenuButton();
             _homePage.ClickAboutPage();
             _aboutPage.ClickDownloadEPAMAtGlance();
             _aboutPage.CheckIsSpecificFileExist(fileName);

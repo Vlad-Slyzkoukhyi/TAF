@@ -22,7 +22,7 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.Id, Using = "onetrust-accept-btn-handler")]
         private readonly IWebElement? _acceptCookieButton;
 
-        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Careers']")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Careers']")]
         private readonly IWebElement? _careersPage;
 
         [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-icon.header-search__search-icon")]
@@ -37,18 +37,23 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
         private readonly IWebElement? _searchResult;
 
-        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='About']")]
-        private readonly IWebElement? _aboutPage;
-
-        //[FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']")]
-        //private readonly IWebElement? _insightsPage;
+        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='About']")]
+        private readonly IWebElement? _aboutPage;        
 
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
         private readonly IList<IWebElement>? _searchRequestWordResult;
 
-        private readonly By? _searchResults = By.ClassName("search-results__items");
-        private readonly By? _insightsPage = By.XPath("//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']");
+        [FindsBy(How = How.CssSelector, Using = ".hamburger-menu__button")]
+        private readonly IWebElement _menuButton;
 
+        private readonly By? _searchResults = By.ClassName("search-results__items");
+        private readonly By? _insightsPage = By.XPath("//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Insights']");
+
+        public void ClickMenuButton()
+        {
+            Wait.Until(ExpectedConditions.ElementToBeClickable(_menuButton));
+            _menuButton.Click();
+        }
         public void ClickCareersPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_careersPage));

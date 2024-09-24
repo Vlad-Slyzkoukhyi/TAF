@@ -34,6 +34,7 @@ namespace TAF_Task.Tests
         public void CheckLatestJobTest(string programingLanguage, string location)
         {
             _homePage.AcceptCookieButton();
+            _homePage.ClickMenuButton();
             _homePage.ClickCareersPage();
             _careersPage.SendKeysInInputCareerKeywordField(programingLanguage);
             _careersPage.ChoiceLocation(location);
