@@ -42,9 +42,8 @@ namespace TAF_Task.Tests
             {
                 if (TestContext.CurrentContext.Result.Outcome != ResultState.Success)
                 {
-                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName,
-                                   Path.Combine(TestContext.CurrentContext.TestDirectory,
-                                                ScreenshotTaker.ScreenShotPath));
+                    string screenshotsDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "Screenshots");
+                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName, screenshotsDirectory);
                 }
             }
             finally
@@ -60,7 +59,7 @@ namespace TAF_Task.Tests
             try
             {
                 Log.Info("Generating of screenshot started.");
-                ScreenshotTaker.TakeScreenshot(Driver, screenshotName, folderPath);
+                ScreenshotTaker.TakeScreenshot(Driver, screenshotName, folderPath ?? Path.Combine(Environment.CurrentDirectory, "Screenshots"));
                 Log.Info("Generating of screenshot finished.");
             }
             catch (Exception ex)
