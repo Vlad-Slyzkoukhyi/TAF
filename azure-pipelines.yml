@@ -1,3 +1,13 @@
+parameters:
+  - name: browser
+    displayName: 'Browser for UI tests'
+    type: string
+    default: 'chrome'
+    values:
+    - chrome
+    - firefox
+    - edge
+
 trigger:
   branches:
     include:
@@ -77,13 +87,22 @@ jobs:
         displayName: 'Test UI Project'
         env:
           UI_TEST: true
-          BROWSER: 'chrome'
+          BROWSER: ${{ parameters.browser }}
+          SCREENSHOTS_PATH: $(Build.ArtifactStagingDirectory)/Screenshots
 
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/ui_test_results.trx'
         displayName: 'Publish UI Test Results'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(System.DefaultWorkingDirectory)/Screenshots'
+          ArtifactName: 'UITestScreenshots'
+          publishLocation: 'container'
+        condition: succeededOrFailed()
+        displayName: 'Publish Screenshots as Artifacts'
 
       - script: mkdir -p "$(System.DefaultWorkingDirectory)/Screenshots"
         displayName: 'Create Screenshots Directory'
