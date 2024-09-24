@@ -30,7 +30,7 @@ namespace TAF_Task.Tests
         public void SetUp()
         {
             Driver = WebDriverFactory.CreateDriver();
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             Driver.Manage().Window.Maximize();
             Log.Info("Browser start");
         }

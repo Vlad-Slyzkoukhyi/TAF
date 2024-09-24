@@ -14,6 +14,11 @@ namespace TAF_Task.PageObjectsModel
             PageFactory.InitElements(driver, this);
         }
 
+        public HomePage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
+        {
+            PageFactory.InitElements(driver, this);
+        }
+
         [FindsBy(How = How.Id, Using = "onetrust-accept-btn-handler")]
         private readonly IWebElement? _acceptCookieButton;
 
@@ -47,6 +52,7 @@ namespace TAF_Task.PageObjectsModel
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_careersPage));
             _careersPage?.Click();
+            Log.Info("Careers page is open");
         }
 
         public void ClickMagnifierIcon()
@@ -59,12 +65,14 @@ namespace TAF_Task.PageObjectsModel
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_aboutPage));
             _aboutPage?.Click();
+            Log.Info("About page is open");
         }
 
         public void ClickInsightsPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_insightsPage));
             _insightsPage?.Click();
+            Log.Info("Insights page is open");
         }   
 
         public void SendRequestWordAtSearchField(string requestWord)

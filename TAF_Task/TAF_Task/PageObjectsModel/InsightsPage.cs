@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Microsoft.Extensions.Configuration;
+using OpenQA.Selenium;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
 using System;
@@ -11,12 +12,16 @@ namespace TAF_Task.PageObjectsModel
 {
     internal class InsightsPage : BasePage
     {
-        private readonly IWebDriver _driver;
         private string? _activeArticleName;
         private string? _articleName;
         public InsightsPage(IWebDriver driver) : base(driver)
         {
-            _driver = driver;
+            PageFactory.InitElements(driver, this);
+        }
+
+        public InsightsPage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
+        {
+            PageFactory.InitElements(driver, this);
         }
 
         [FindsBy(How = How.ClassName, Using = "slider__right-arrow")]

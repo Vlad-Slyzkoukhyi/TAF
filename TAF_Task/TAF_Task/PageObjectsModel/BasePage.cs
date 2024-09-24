@@ -21,13 +21,7 @@ namespace TAF_Task.PageObjectsModel
         protected IWebDriver Driver;
         protected WebDriverWait Wait;
         protected IConfiguration? Configuration;
-        protected ILog Log => LogManager.GetLogger(this.GetType());
-
-        [OneTimeSetUp]
-        public void InitializeOnce()
-        {
-            XmlConfigurator.Configure(new FileInfo("Log4net.config"));
-        }
+        protected ILog Log => LogManager.GetLogger(this.GetType());        
 
         private readonly By _acceptCookie = By.Id("onetrust-accept-btn-handler");
 
@@ -35,14 +29,14 @@ namespace TAF_Task.PageObjectsModel
         {
             Driver = driver;
             PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
         protected BasePage(IWebDriver driver, IConfiguration? configuration)
         {
             Driver = driver;
             Configuration = configuration;
             PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
         public void AcceptCookieButton()
@@ -56,6 +50,7 @@ namespace TAF_Task.PageObjectsModel
                 if (acceptCookieButton != null)
                 {
                     acceptCookieButton.Click();
+                    Log.Info("Cookie Accepted.");
                 }
                 else
                 {

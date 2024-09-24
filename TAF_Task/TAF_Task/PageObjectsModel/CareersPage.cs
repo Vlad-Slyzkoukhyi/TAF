@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Microsoft.Extensions.Configuration;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
@@ -17,7 +18,12 @@ namespace TAF_Task.PageObjectsModel
         {
             PageFactory.InitElements(driver, this);
         }
-        
+
+        public CareersPage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
+        {
+            PageFactory.InitElements(driver, this);
+        }
+
         [FindsBy(How = How.Id, Using = "new_form_job_search-keyword")]
         private readonly IWebElement? _inputCareersField;
 
