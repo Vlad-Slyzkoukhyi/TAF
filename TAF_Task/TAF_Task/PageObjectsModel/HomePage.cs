@@ -17,7 +17,7 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.Id, Using = "onetrust-accept-btn-handler")]
         private readonly IWebElement? _acceptCookieButton;
 
-        [FindsBy(How = How.LinkText, Using = "Careers")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Careers']")]
         private readonly IWebElement? _careersPage;
 
         [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-icon.header-search__search-icon")]
@@ -32,10 +32,10 @@ namespace TAF_Task.PageObjectsModel
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
         private readonly IWebElement? _searchResult;
 
-        [FindsBy(How = How.LinkText, Using = "About")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='About']")]
         private readonly IWebElement? _aboutPage;
 
-        [FindsBy(How = How.LinkText, Using = "Insights")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='top-navigation__item-link js-op'][normalize-space()='Insights']")]
         private readonly IWebElement? _insightsPage;
 
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
