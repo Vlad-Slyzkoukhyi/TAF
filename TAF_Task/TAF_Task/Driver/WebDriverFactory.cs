@@ -3,6 +3,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Interactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,18 +28,21 @@ namespace TAF_Task.Driver
             switch (browserType)
             {
                 case BrowserType.Chrome:
-                    var chromOptions = new ChromeOptions();                    
+                    var chromeOptions = new ChromeOptions();
+                    chromeOptions.AddUserProfilePreference("download.default_directory", @"$(Build.ArtifactStagingDirectory)\Downloads");
+                    chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
+                    chromeOptions.AddUserProfilePreference("disable-popup-blocking", "true");
                     if (settings.Headless)
-                        chromOptions.AddArguments("--headless");
+                        chromeOptions.AddArguments("--headless");
                     if (settings.MaximizeWindow)
-                        chromOptions.AddArgument("--start-maximized");
+                        chromeOptions.AddArgument("--start-maximized");
 
-                    return new ChromeDriver(chromOptions);
+                    return new ChromeDriver(chromeOptions);
 
                 case BrowserType.Firefox:
                     var firefoxOptions = new FirefoxOptions();
                     if (settings.Headless)
-                        firefoxOptions.AddArgument("-headless");  // Notice Firefox uses "-headless"
+                        firefoxOptions.AddArgument("-headless");
                     if (settings.MaximizeWindow)
                         firefoxOptions.AddArgument("--window-size=1920,1080");
 

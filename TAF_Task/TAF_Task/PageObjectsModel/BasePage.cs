@@ -29,14 +29,14 @@ namespace TAF_Task.PageObjectsModel
         {
             Driver = driver;
             PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
         }
         protected BasePage(IWebDriver driver, IConfiguration? configuration)
         {
             Driver = driver;
             Configuration = configuration;
             PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
         }
 
         public void AcceptCookieButton()

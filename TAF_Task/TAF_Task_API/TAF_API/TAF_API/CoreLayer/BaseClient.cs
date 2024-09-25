@@ -6,7 +6,7 @@ namespace TAF_API.CoreLayer
     public class BaseClient
     {
         private readonly RestClient client;
-        private static readonly ILog log = LogManager.GetLogger(typeof(BaseClient));
+        protected ILog Log => LogManager.GetLogger(this.GetType());
 
         public BaseClient(string baseUrl)
         {
@@ -17,17 +17,17 @@ namespace TAF_API.CoreLayer
             };
 
             client = new RestClient(options);
-            log.Info("API Client initialized with base URL: " + baseUrl);
+            Log.Info("API Client initialized with base URL: " + baseUrl);
         }
 
         public RestResponse<T> ExecuteRequest<T>(RestRequest request) where T : new()
         {
-            log.Info($"Executing request to {request.Resource}");
+            Log.Info($"Executing request to {request.Resource}");
             var response = client.Execute<T>(request);
             if (response.ErrorException != null)
-                log.Error($"Error executing request: {response.ErrorMessage}", response.ErrorException);
+                Log.Error($"Error executing request: {response.ErrorMessage}", response.ErrorException);
             else
-                log.Info($"Request successfully executed with status: {response.StatusCode}");
+                Log.Info($"Request successfully executed with status: {response.StatusCode}");
 
             return response;
         }
