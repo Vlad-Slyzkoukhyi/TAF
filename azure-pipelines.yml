@@ -36,26 +36,20 @@ jobs:
   - job: APITests
     displayName: 'Execute API Tests'
     steps:
-    
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
           packageType: 'sdk'
-      
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
           packageType: 'runtime'
-
       - script: dotnet restore TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj
         displayName: 'Restore API Packages'
-
       - script: dotnet build TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration)
         displayName: 'Build API Project'
-
       - script: dotnet test TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
         displayName: 'Test API Project'
-
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
@@ -68,36 +62,38 @@ jobs:
     condition: succeededOrFailed()
     steps:
       - script: mkdir -p "$(Build.ArtifactStagingDirectory)/Screenshots"
-        displayName: 'Create Screenshots Directory'
+                mkdir -p "$(Build.ArtifactStagingDirectory)/Downloads"
+        displayName: 'Create Directories'
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
           packageType: 'sdk'
-      
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
           packageType: 'runtime'
-
       - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
         displayName: 'Restore UI Packages'
-
       - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration)
         displayName: 'Build UI Project'
-
       - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx"
         displayName: 'Test UI Project'
         env:
           UI_TEST: true
           BROWSER: ${{ parameters.browser }}
           SCREENSHOTS_PATH: $(Build.ArtifactStagingDirectory)/Screenshots
-
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/ui_test_results.trx'
         displayName: 'Publish UI Test Results'
-
+        
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Downloads'
+          ArtifactName: 'DownloadedFiles'
+          publishLocation: 'container'
+        displayName: 'Publish Downloaded Files as Artifacts'
       - task: PublishBuildArtifacts@1
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/Screenshots'
@@ -105,10 +101,6 @@ jobs:
           publishLocation: 'container'
         condition: succeededOrFailed()
         displayName: 'Publish Screenshots as Artifacts'
-
-      - script: mkdir -p "$(System.DefaultWorkingDirectory)/Screenshots"
-        displayName: 'Create Screenshots Directory'
-
       - upload: '**/Screenshots'
         condition: succeeded()
         displayName: 'Upload Screenshots'
