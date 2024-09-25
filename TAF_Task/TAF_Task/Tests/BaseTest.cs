@@ -20,6 +20,7 @@ namespace TAF_Task.Tests
     {
         protected IWebDriver? Driver;
         IConfigurationRoot? configuration;
+
         protected ILog Log => LogManager.GetLogger(this.GetType());
 
         [OneTimeSetUp]
@@ -45,10 +46,10 @@ namespace TAF_Task.Tests
                 try
                 {
                     var outcome = TestContext.CurrentContext.Result.Outcome;
+                    
                     if (!outcome.Equals(ResultState.Success))
                     {                        
-                        string screenshotsDirectory = Environment.GetEnvironmentVariable(
-                            configuration.GetSection("AppSettings").Get<AppSettings>().GenerateScreenshotDirectory) 
+                        string screenshotsDirectory = Environment.GetEnvironmentVariable("E:\\Study\\EPAM\\Automated Testing\\CI_CD\\TAF_Task\\TAF_Task\\Screenshots\\TestFailScreenshots") 
                             ?? Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
 
                         ScreenshotTaker.TakeScreenshot(Driver, TestContext.CurrentContext.Test.Name, screenshotsDirectory);
