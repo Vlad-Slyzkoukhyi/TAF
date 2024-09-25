@@ -30,7 +30,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Debug'
+  buildConfiguration: 'Release'
 
 jobs:
   - job: APITests
@@ -67,6 +67,8 @@ jobs:
     dependsOn: APITests
     condition: succeededOrFailed()
     steps:
+      - script: mkdir -p "$(Build.ArtifactStagingDirectory)/Screenshots"
+        displayName: 'Create Screenshots Directory'
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
@@ -98,7 +100,7 @@ jobs:
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(System.DefaultWorkingDirectory)/Screenshots'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Screenshots'
           ArtifactName: 'UITestScreenshots'
           publishLocation: 'container'
         condition: succeededOrFailed()
