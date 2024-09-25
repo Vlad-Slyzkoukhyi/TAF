@@ -12,12 +12,14 @@ using log4net.Config;
 using log4net;
 using Microsoft.Extensions.Configuration;
 using TAF_Task.Utils;
+using System.Configuration;
 
 namespace TAF_Task.Tests
 {
     public abstract class BaseTest
     {
         protected IWebDriver? Driver;
+        IConfigurationRoot? configuration;
         protected ILog Log => LogManager.GetLogger(this.GetType());
 
         [OneTimeSetUp]
@@ -42,15 +44,18 @@ namespace TAF_Task.Tests
             {
                 try
                 {
-                    var outcome = TestContext.CurrentContext.Result.Outcome; 
-                    if (!outcome.Equals(ResultState.Success)) 
-                    {
-                        string screenshotsDirectory = Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
+                    var outcome = TestContext.CurrentContext.Result.Outcome;
+                    if (!outcome.Equals(ResultState.Success))
+                    {                        
+                        string screenshotsDirectory = Environment.GetEnvironmentVariable(
+                            configuration.GetSection("AppSettings").Get<AppSettings>().GenerateScreenshotDirectory) 
+                            ?? Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
+
                         ScreenshotTaker.TakeScreenshot(Driver, TestContext.CurrentContext.Test.Name, screenshotsDirectory);
                     }
                 }
                 catch (Exception ex)
-                {                   
+                {
                     Log.Error("Error taking screenshot or during TearDown", ex);
                 }
                 finally
@@ -79,7 +84,7 @@ namespace TAF_Task.Tests
 
         public AppSettings? GetAppSettings()
         {
-            IConfigurationRoot? configuration = new ConfigurationBuilder()
+                configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
