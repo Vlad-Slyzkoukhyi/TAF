@@ -1,12 +1,12 @@
 trigger:
   branches:
     include:
-      - main
+    - main
 
 pr:
   branches:
     include:
-      - main
+    - main
 
 schedules:
   - cron: "0 21 * * *"
@@ -38,7 +38,7 @@ jobs:
     steps:
       - task: UseDotNet@2
         inputs:
-          version: '8.0.x' # Adjust .NET version as per your requirement
+          version: '8.0.x' # Confirm the version numbers
           packageType: 'sdk'
       - task: UseDotNet@2
         inputs:
@@ -62,12 +62,28 @@ jobs:
     condition: succeededOrFailed()
     steps:
       - script: |
-          mkdir "$(Build.ArtifactStagingDirectory)\Screenshots"
-          mkdir "$(Build.ArtifactStagingDirectory)\Downloads"
+          New-Item -ItemType Directory -Path "$(Build.ArtifactStagingDirectory)\Screenshots" -Force
+          New-Item -ItemType Directory -Path "$(Build.ArtifactStagingDirectory)\Downloads" -Force
         displayName: 'Create Directories'
+      - script: |
+          if (Test-Path "$(Build.ArtifactStagingDirectory)\Screenshots") {
+            Write-Host "Screenshots directory created successfully."
+          } else {
+            Write-Host "Failed to create Screenshots directory."
+            exit 1
+          }
+          
+          if (Test-Path "$(Build.ArtifactStagingDirectory)\Downloads") {
+            Write-Host "Downloads directory created successfully."
+          } else {
+            Write-Host "Failed to create Downloads directory."
+            exit 1
+          }
+        displayName: 'Check Directories Creation'
+        failOnStderr: true
       - task: UseDotNet@2
         inputs:
-          version: '8.0.x'
+          version: '8.0.x' # Confirm .NET versions are correct
           packageType: 'sdk'
       - task: UseDotNet@2
         inputs:
