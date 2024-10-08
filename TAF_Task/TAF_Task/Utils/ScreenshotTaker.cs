@@ -1,39 +1,28 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
 using OpenQA.Selenium;
-using System.IO;
-using System;
 
 namespace TAF_Task.ScreenShots
 {
-    public static class ScreenshotTaker
+    internal static class ScreenshotTaker
     {
-        public static void TakeScreenshot(IWebDriver driver, string testName, string folderPath)
+        public static string ScreenShotPath => @"E:\Study\EPAM\TAF\TAF_Task\TAF_Task\Screenshots\TestFailScreenshots\";
+        internal static void TakeScreenshot(IWebDriver? driver, string? testName, string? folderPath)
         {
-            try
+            if (!Directory.Exists(folderPath) && folderPath != null)
             {
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                string sanitizedTestName = SanitizeFilename(testName);
-                string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                string screenFileName = $"{sanitizedTestName}_{timestamp}.jpeg";
-                string screenPath = Path.Combine(folderPath, screenFileName);
-
-                Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
-                screenshot.SaveAsFile(screenPath);
+                Directory.CreateDirectory(folderPath);
             }
-            catch (Exception ex)
+
+            string screenFileName =
+                $"{testName} {DateTime.Now:dd,MM,yyyy_H,mm,ss}.{ImageFormat.Jpeg.ToString().ToLowerInvariant()}";
+
+            string screenPath = Path.Combine(ScreenShotPath, screenFileName);
+
+            using (Image screenshot = Image.FromStream(new MemoryStream(((ITakesScreenshot)driver).GetScreenshot().AsByteArray)))
             {
-                throw new InvalidOperationException("Failed to capture screenshot.", ex);
+                screenshot?.Save(screenPath);
             }
-        }
-
-        private static string SanitizeFilename(string filename)
-        {
-            var invalidChars = Path.GetInvalidFileNameChars();
-            var cleanFilename = new string(filename.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
-            return cleanFilename;
         }
     }
 }

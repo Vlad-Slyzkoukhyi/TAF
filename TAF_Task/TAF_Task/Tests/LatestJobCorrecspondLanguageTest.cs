@@ -11,18 +11,13 @@ namespace TAF_Task.Tests
     public class LatestJobCorrecspondLanguageTest : BaseTest
     {
         private HomePage _homePage;
-        private CareersPage _careersPage;
-        private string _baseUrl;
+        private Assertions _assertions;
 
         [SetUp]
         public void LocalSetUp()
-        {
+        {            
             _homePage = new HomePage(Driver);
-            _careersPage = new CareersPage(Driver);
-            var appSettings = GetAppSettings();
-            _baseUrl = appSettings.BaseUrl;
-
-            Driver.Navigate().GoToUrl(_baseUrl);
+            _assertions = new Assertions();
         }
 
         //Check are latest job contain specific language and location
@@ -31,19 +26,20 @@ namespace TAF_Task.Tests
         [TestCase("Java", "All Locations")]
         [TestCase("JavaScript", "All Locations")]
         [TestCase("Python", "All Locations")]
-        public void CheckLatestJobTest(string programingLanguage, string location)
+        public void TestCheckLatestJob(string programingLanguage, string location)
         {
-            _homePage.AcceptCookieButton();
-            _homePage.ClickMenuButton();
-            _homePage.ClickCareersPage();
-            _careersPage.SendKeysInInputCareerKeywordField(programingLanguage);
-            _careersPage.ChoiceLocation(location);
-            _careersPage.ClickRemoteCheckBox();
-            _careersPage.ClickFindButton();
-            _careersPage.ClickSortByDate();
-            _careersPage.ClickViewMoreButton();
+            _homePage.AcceptCookieIfPresent();
+            CareersPage _careersPage = _homePage.NavigateToCareersPage()
+                .SearchJobByKeyword(programingLanguage)
+                .SearchJobByLocation(location)
+                .ClickRemoteCheckBox();
+            _assertions.AssertRemoteCheckBoxIsSelected(_careersPage.GetCheckBoxElement());
+            _careersPage.ClickFindButton()
+                .ClickSortByDate()
+                .ClickViewMoreButton();
+            _assertions.CheckListNotEmpty(_careersPage.GetJobOpportunitiesList());
             _careersPage.ClickViewAndApplyAtTheLastElement();
-            _careersPage.CheckTheLastElementContainProgramingLanguage(programingLanguage);
+            _assertions.AssertTheLastElementContainProgramingLanguage(programingLanguage, _careersPage.GetMainElementText());
         }
     }
 }

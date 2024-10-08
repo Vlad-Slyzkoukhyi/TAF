@@ -12,33 +12,26 @@ namespace TAF_Task.Tests
     public class ArticleNameOnInsightPageTest : BaseTest
     {
         private HomePage _homePage;
-        private InsightsPage _insightPage;
-        private string? _baseUrl;
+        private Assertions _assertions;
 
         [SetUp]
         public void LocalSetUp()
-        {
+        {            
             _homePage = new HomePage(Driver);
-            _insightPage = new InsightsPage(Driver);
-            AppSettings? appSettings = GetAppSettings();
-            _baseUrl = appSettings.BaseUrl;
-
-            Driver.Navigate().GoToUrl(_baseUrl);
+            _assertions = new Assertions();
         }
 
         //Check is article name on insight page equal article name when read article page
-        [Test]        
-        public void CheckArticleName()
+        [Test]
+        public async Task TestCheckArticleName()
         {
-            _homePage.AcceptCookieButton();
-            _homePage.ClickMenuButton();
-            _homePage.ClickInsightsPage();
-            _insightPage.ClickSwipeRightButtonWithWait1000();
-            _insightPage.ClickSwipeRightButtonWithWait1000();
-            _insightPage.GetActiveArticleName();
-            _insightPage.ClickReadMoreActiveArticle();
-            _insightPage.GetArticleName();
-            _insightPage.CheckArcticleName();
+            _homePage.AcceptCookieIfPresent();
+            InsightsPage _insightsPage = _homePage.NavigateToInsightsPage();
+            _insightsPage = await _insightsPage.SwipeCaruselRight();
+            _insightsPage = await _insightsPage.SwipeCaruselRight();
+            string activeArticle = _insightsPage.GetActiveArticleName();
+            _insightsPage.ClickActiveArticle();
+            _assertions.AssertArticleNamesAreEqual(activeArticle, _insightsPage.GetOpenArticleName());
         }
     }
 }

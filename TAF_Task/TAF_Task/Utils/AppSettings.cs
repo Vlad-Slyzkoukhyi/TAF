@@ -10,7 +10,6 @@ namespace TAF_Task.Utils
     {
         public string? BaseUrl { get; set; }
         public string? DownloadDirectory { get; set; }
-        public string? GenerateScreenshotDirectory { get; set; }
         public bool PromptForDownload { get; set; }
         public bool DisablePopupBlocking { get; set; }
     }

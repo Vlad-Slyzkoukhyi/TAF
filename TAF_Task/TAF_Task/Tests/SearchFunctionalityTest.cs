@@ -11,16 +11,13 @@ namespace TAF_Task.Tests
     public class SearchFunctionalityTest : BaseTest
     {
         private HomePage _homePage;
-        private string _baseUrl;
+        private Assertions _assertions;
 
         [SetUp]
         public void LocalSetUp()
-        {
+        {            
             _homePage = new HomePage(Driver);
-            var appSettings = GetAppSettings();
-            _baseUrl = appSettings.BaseUrl;
-
-            Driver.Navigate().GoToUrl(_baseUrl);
+            _assertions = new Assertions();
         }
 
         //Check are search result contain specific words
@@ -30,11 +27,11 @@ namespace TAF_Task.Tests
         [TestCase("Automation")]
         public void TestSearchFunctionality(string requestWord)
         {
-            _homePage.AcceptCookieButton();
-            _homePage.ClickMagnifierIcon();
-            _homePage.SendRequestWordAtSearchField(requestWord);
-            _homePage.ClickFindButtonMainPage();
-            _homePage.CheckIsResultSearchContainRequestWord(requestWord);
+            _homePage.AcceptCookieIfPresent();
+            _homePage.ClickOnMagnifierIcon()
+                .SendRequestWordAtSearchField(requestWord)
+                .ClickFindButtonMainPage();
+            _assertions.AssertSearchResultsContainKeyword(_homePage.GetSearchResults(), requestWord);
         }
     }
 }

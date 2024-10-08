@@ -13,93 +13,78 @@ namespace TAF_Task.PageObjectsModel
         {
             PageFactory.InitElements(driver, this);
         }
+        
+        [FindsBy(How = How.LinkText, Using = "Careers")]
+        private readonly IWebElement _careersPage;
 
-        public HomePage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
-        {
-            PageFactory.InitElements(driver, this);
-        }
+        [FindsBy(How = How.LinkText, Using = "About")]
+        private readonly IWebElement _aboutPage;
 
-        [FindsBy(How = How.Id, Using = "onetrust-accept-btn-handler")]
-        private readonly IWebElement? _acceptCookieButton;
-
-        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Careers']")]
-        private readonly IWebElement? _careersPage;
+        [FindsBy(How = How.LinkText, Using = "Insights")]
+        private readonly IWebElement _insightsPage;
 
         [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-icon.header-search__search-icon")]
-        private readonly IWebElement? _magnifierIcon;
+        private readonly IWebElement _magnifierIcon;
 
         [FindsBy(How = How.Id, Using = "new_form_search")]
-        private readonly IWebElement? _searchField;
+        private readonly IWebElement _searchField;
 
         [FindsBy(How = How.ClassName, Using = "bth-text-layer")]
-        private readonly IWebElement? _findButton;
+        private readonly IWebElement _findButton;
 
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
-        private readonly IWebElement? _searchResult;
-
-        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='About']")]
-        private readonly IWebElement? _aboutPage;        
-
-        [FindsBy(How = How.ClassName, Using = "search-results__item")]
-        private readonly IList<IWebElement>? _searchRequestWordResult;
-
-        [FindsBy(How = How.CssSelector, Using = ".hamburger-menu__button")]
-        private readonly IWebElement _menuButton;
-
-        private readonly By? _searchResults = By.ClassName("search-results__items");
-        private readonly By? _insightsPage = By.XPath("//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Insights']");
-
-        public void ClickMenuButton()
-        {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_menuButton));
-            _menuButton.Click();
-        }
-        public void ClickCareersPage()
+        private readonly IList<IWebElement> _searchRequestWordResult;
+        
+        public CareersPage NavigateToCareersPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_careersPage));
-            _careersPage?.Click();
-            Log.Info("Careers page is open");
+            Log.Info("Navigate to careers page");
+            _careersPage.Click();
+            return new CareersPage(Driver);
         }
 
-        public void ClickMagnifierIcon()
-        {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_magnifierIcon));
-            _magnifierIcon?.Click();
-        }
-
-        public void ClickAboutPage()
+        public AboutPage NavigateToAboutPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_aboutPage));
-            _aboutPage?.Click();
-            Log.Info("About page is open");
+            Log.Info("Navigate to about page");
+            _aboutPage.Click();
+            return new AboutPage(Driver);
         }
 
-        public void ClickInsightsPage()
+        public InsightsPage NavigateToInsightsPage()
         {
-            Wait.Until(ExpectedConditions.ElementIsVisible(_insightsPage));
             Wait.Until(ExpectedConditions.ElementToBeClickable(_insightsPage));
-            IWebElement _insightsPageElement = Driver.FindElement(_insightsPage);
-            _insightsPageElement?.Click();
-            Log.Info("Insights page is open");
+            Log.Info("Navigate to insight page");
+            _insightsPage.Click();
+            return new InsightsPage(Driver);
         }   
-
-        public void SendRequestWordAtSearchField(string requestWord)
+        public HomePage ClickOnMagnifierIcon()
         {
-            _searchField?.Clear();
-            _searchField?.SendKeys(requestWord);
+            Log.Info("Click magnifier icon");
+            ClickElement(_magnifierIcon);
+            return this;
         }
 
-        public void ClickFindButtonMainPage()
+        public HomePage SendRequestWordAtSearchField(string requestWord)
+        {
+            Wait.Until(ExpectedConditions.ElementToBeClickable(_searchField));
+            _searchField.Clear();
+            Log.Info("Send neccesary keyword");
+            _searchField.SendKeys(requestWord);
+            return this;
+        }
+
+        public HomePage ClickFindButtonMainPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_findButton));
-            _findButton?.Click();
+            Log.Info("Click find button");
+            _findButton.Click();
+            return this;
         }
 
-        public void CheckIsResultSearchContainRequestWord(string requestWord)
+        public IList<IWebElement> GetSearchResults()
         {
-            Wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(_searchResults));
-            bool allLinksIsValid = _searchRequestWordResult.All(link => requestWord.Any(keyword => link.Text.Contains(keyword)));
-            Assert.That(allLinksIsValid, Is.True);
+            return _searchRequestWordResult;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
 using System;
@@ -12,59 +11,39 @@ namespace TAF_Task.PageObjectsModel
 {
     internal class InsightsPage : BasePage
     {
-        private string? _activeArticleName;
-        private string? _articleName;
         public InsightsPage(IWebDriver driver) : base(driver)
         {
             PageFactory.InitElements(driver, this);
         }
 
-        public InsightsPage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
-        {
-            PageFactory.InitElements(driver, this);
-        }
-
-        [FindsBy(How = How.ClassName, Using = "slider__right-arrow")]
-        private IWebElement? _swipeRightButton;
-
-        [FindsBy(How = How.CssSelector, Using = ".owl-item.active .text-ui-23")]
-        private IWebElement? _activeArticleElement;
-
         [FindsBy(How = How.CssSelector, Using = ".owl-item.active .custom-link")]
-        private IWebElement? _readMoreActiveArticle;
+        private readonly IWebElement _readMoreActiveArticle;
 
-        [FindsBy(How = How.ClassName, Using = "font-size-80-33")]
-        private IWebElement? _articleNameElement;
+        private readonly By _swipeRightButton = By.ClassName("slider__right-arrow");
+        private readonly By _activeArticleElement = By.CssSelector(".owl-item.active .text-ui-23");
+        private readonly By _articleName = By.ClassName("font-size-80-33");
 
-        public void ClickSwipeRightButtonWithWait1000()
+        public async Task<InsightsPage> SwipeCaruselRight()
         {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_swipeRightButton));
-            _swipeRightButton?.Click();
-            Thread.Sleep(1000);
+            Log.Info("Click swipe carusel right");
+            await ClickElementWithDelayAfterClicking(_swipeRightButton);
+            return this;
         }
 
-        public void GetActiveArticleName()
+        public void ClickActiveArticle()
         {
-            _activeArticleName = _activeArticleElement?.Text.Trim();
+            Log.Info("Click read more");
+            ClickElement(_readMoreActiveArticle);
         }
 
-        public void GetArticleName()
+        public string GetActiveArticleName()
         {
-            _articleName = _articleNameElement?.Text.Trim();
+            return GetText(_activeArticleElement);
         }
 
-        public void ClickReadMoreActiveArticle()
+        public string GetOpenArticleName()
         {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_readMoreActiveArticle));
-            _readMoreActiveArticle?.Click();
-        }  
-
-        public void CheckArcticleName()
-        {
-            if (_activeArticleName != null && _articleName != null)
-            {
-                Assert.That(_activeArticleName.Equals(_articleName), "Articles are different");
-            }
+            return GetText(_articleName);
         }
     }
 }

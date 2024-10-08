@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.PageObjects;
 using SeleniumExtras.WaitHelpers;
@@ -18,110 +17,102 @@ namespace TAF_Task.PageObjectsModel
         {
             PageFactory.InitElements(driver, this);
         }
-
-        public CareersPage(IWebDriver driver, IConfiguration configuration) : base(driver, configuration)
-        {
-            PageFactory.InitElements(driver, this);
-        }
-
-        [FindsBy(How = How.Id, Using = "new_form_job_search-keyword")]
-        private readonly IWebElement? _inputCareersField;
-
+        
         [FindsBy(How = How.ClassName, Using = "recruiting-search__location")]
-        private readonly IWebElement? _listFieldLocation;
+        private readonly IWebElement _listFieldLocation;
 
         [FindsBy(How = How.XPath, Using = "//li[@title='All Locations']")]
-        private readonly IWebElement? _dropDownListLocation;
+        private readonly IWebElement _dropDownListLocation;
 
         [FindsBy(How = How.CssSelector, Using = ".recruiting-search__filter-label-23")]
-        private readonly IWebElement? _remoteCheckBoxElement;
-
-        [FindsBy(How = How.Id, Using = "id-93414a92-598f-316d-b965-9eb0dfefa42d-remote")]
-        private readonly IWebElement? _remoteCheckBoxElementState;
+        private readonly IWebElement _remoteCheckBox;
 
         [FindsBy(How = How.CssSelector, Using = "button[type='submit'].job-search-button-transparent-23")]
-        private readonly IWebElement? _findButton;
+        private readonly IWebElement _findButton;
 
-        [FindsBy(How = How.XPath, Using = "//li[@title='Date']")]
-        private readonly IWebElement? _sortByDateButton;
-
-        [FindsBy(How = How.XPath, Using = "//a[text()='View More']")]
-        private readonly IWebElement? _viewMoreButton;
-
-        [FindsBy(How = How.XPath, Using = "//a[text()='View and apply']")]
-        private readonly IList<IWebElement>? _jobOpportunities;
-
-        [FindsBy(How = How.Id, Using = "main")]
-        private readonly IWebElement? _mainElementText;
-
+        private readonly By _jobField = By.Id("new_form_job_search-keyword");
+        private readonly By _sortByDateButton = By.XPath("//li[@title='Date']");
         private readonly By _searchPage = By.ClassName("search-result__list");
+        private readonly By _viewMoreButton = By.XPath("//a[text()='View More']");
+        private readonly By _isRemoteCheckBoxTrue = By.Id("id-93414a92-598f-316d-b965-9eb0dfefa42d-remote");
+        private readonly By _jobOpportunitiesList = By.XPath("//a[text()='View and apply']");
+        private readonly By _currentJobElement = By.Id("main");
 
-        public void SendKeysInInputCareerKeywordField(string programingLanguage)
+        public CareersPage SearchJobByKeyword(string keyword)
         {
-            _inputCareersField?.Clear();
-            _inputCareersField?.SendKeys(programingLanguage);
+            Log.Info("Send keyword");
+            SendKeys(_jobField, keyword);
+            return this;
         }
 
-        public void ChoiceLocation(string location)
+        public CareersPage SearchJobByLocation(string location)
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_listFieldLocation));
+            Log.Info("Click location list");
             _listFieldLocation?.Click();
             Wait.Until(ExpectedConditions.ElementToBeClickable(Driver.FindElement(By.XPath($"//li[@title='{location}']"))));
+            Log.Info("Click necessary element");
             _dropDownListLocation?.Click();
+            return this;
         }
 
-        public void ClickRemoteCheckBox()
+        public CareersPage ClickRemoteCheckBox()
         {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_remoteCheckBoxElement));
-            _remoteCheckBoxElement?.Click();
-            Wait.Until(ExpectedConditions.ElementSelectionStateToBe(_remoteCheckBoxElementState, true));
-            CheckRemoteCheckBoxIsSelected(_remoteCheckBoxElementState);
+            Log.Info("Click remote check box");
+            ClickElement(_remoteCheckBox);
+            return this;
         }
 
-        public void ClickFindButton()
+        public CareersPage ClickFindButton()
         {
-            Wait.Until(ExpectedConditions.ElementToBeClickable(_findButton));
-            _findButton?.Click();
+            Log.Info("Click find button");
+            ClickElement(_findButton);
+            return this;
         }
 
-        public void ClickSortByDate()
+        public CareersPage ClickSortByDate()
         {
             ScroolJS(_sortByDateButton);
             Wait.Until(ExpectedConditions.ElementToBeClickable(_sortByDateButton));
-            _sortByDateButton?.Click();
+            IWebElement sortByDateElement = Driver.FindElement(_sortByDateButton);
+            Log.Info("Click sort by date");
+            ClickElementJS(sortByDateElement);
+            return this;
         }
 
-        public void ClickViewMoreButton()
+        public CareersPage ClickViewMoreButton()
         {
-            ScroolJSTillTheEnd();
+            ScrollJSTillTheEnd();
             Wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(_searchPage));
             ScroolJS(_viewMoreButton);
             Wait.Until(ExpectedConditions.ElementToBeClickable(_viewMoreButton));
-            _viewMoreButton?.Click();
+            IWebElement viewMoreButtonElement = Driver.FindElement(_viewMoreButton);
+            Log.Info("Click view more button");
+            ClickElementJS(viewMoreButtonElement);
+            return this;
         }
 
         public void ClickViewAndApplyAtTheLastElement()
-        {            
-            CheckListNotEmpty(_jobOpportunities);
-            IWebElement jobOpportunity = _jobOpportunities[_jobOpportunities.Count - 1];
-            Wait.Until(ExpectedConditions.ElementToBeClickable(jobOpportunity));
-            jobOpportunity?.Click();
+        {
+            IList<IWebElement> jobOpportunities = Driver.FindElements(_jobOpportunitiesList);
+            IWebElement jobOpportunity = jobOpportunities[jobOpportunities.Count - 1];
+            Log.Info("Click last searched job element");
+            ClickElementJS(jobOpportunity);
         }
 
-        public void CheckRemoteCheckBoxIsSelected(IWebElement? element)
+        public IWebElement GetCheckBoxElement()
         {
-            Assert.That(element?.Selected, Is.True);
+            return GetElement(_isRemoteCheckBoxTrue);
         }
 
-        public void CheckListNotEmpty(IList<IWebElement>? elements)
+        public IList<IWebElement> GetJobOpportunitiesList()
         {
-            Assert.That(elements, Is.Not.Empty);
+            return GetElements(_jobOpportunitiesList);
         }
 
-        public void CheckTheLastElementContainProgramingLanguage(string programingLanguage)
+        public string GetMainElementText()
         {
-            string mainElementText = _mainElementText.Text;
-            Assert.That(mainElementText.Contains(programingLanguage), $"The page does not contain the keyword {programingLanguage}.");
+            return GetElement(_currentJobElement).Text;
         }
     }
 }

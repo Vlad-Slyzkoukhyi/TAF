@@ -12,59 +12,52 @@ using log4net.Config;
 using log4net;
 using Microsoft.Extensions.Configuration;
 using TAF_Task.Utils;
-using System.Configuration;
 
 namespace TAF_Task.Tests
 {
     public abstract class BaseTest
     {
         protected IWebDriver? Driver;
-        IConfigurationRoot? configuration;
-
+        protected IConfiguration _configuration;
         protected ILog Log => LogManager.GetLogger(this.GetType());
 
         [OneTimeSetUp]
         public void InitializeOnce()
         {
             XmlConfigurator.Configure(new FileInfo("Log4net.config"));
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", true, true);
+            _configuration = builder.Build();
         }
 
         [SetUp]
         public void SetUp()
         {
             Driver = WebDriverFactory.CreateDriver();
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            Driver.Manage().Cookies.DeleteAllCookies();
             Driver.Manage().Window.Maximize();
             Log.Info("Browser start");
+            Driver.Navigate().GoToUrl(_configuration["AppSettings:BaseUrl"]);
+            Log.Info("Url open");
         }
 
         [TearDown]
         public void TearDown()
         {
-            if (Driver != null)
+            try
             {
-                try
+                if (TestContext.CurrentContext.Result.Outcome != ResultState.Success)
                 {
-                    var outcome = TestContext.CurrentContext.Result.Outcome;
-                    
-                    if (!outcome.Equals(ResultState.Success))
-                    {                        
-                        string screenshotsDirectory = Environment.GetEnvironmentVariable("E:\\Study\\EPAM\\Automated Testing\\CI_CD\\TAF_Task\\TAF_Task\\Screenshots\\TestFailScreenshots") 
-                            ?? Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
-
-                        ScreenshotTaker.TakeScreenshot(Driver, TestContext.CurrentContext.Test.Name, screenshotsDirectory);
-                    }
+                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName,
+                                   Path.Combine(TestContext.CurrentContext.TestDirectory,
+                                                ScreenshotTaker.ScreenShotPath));
                 }
-                catch (Exception ex)
-                {
-                    Log.Error("Error taking screenshot or during TearDown", ex);
-                }
-                finally
-                {
-                    Log.Info("Closing Browser");
-                    Driver.Dispose();
-                    Driver.Quit();
-                }
+            }
+            finally
+            {
+                Log.Info("Browser closed");
+                Driver?.Dispose();
+                Driver?.Quit();
             }
         }
 
@@ -73,7 +66,7 @@ namespace TAF_Task.Tests
             try
             {
                 Log.Info("Generating of screenshot started.");
-                ScreenshotTaker.TakeScreenshot(Driver, screenshotName, folderPath ?? Path.Combine(Environment.CurrentDirectory, "Screenshots"));
+                ScreenshotTaker.TakeScreenshot(Driver, screenshotName, folderPath);
                 Log.Info("Generating of screenshot finished.");
             }
             catch (Exception ex)
@@ -81,16 +74,6 @@ namespace TAF_Task.Tests
                 Log.Info($"Failed to capture screenshot. Exception message: {ex.Message}");
                 throw;
             }
-        }
-
-        public AppSettings? GetAppSettings()
-        {
-                configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            return configuration?.GetSection("AppSettings").Get<AppSettings>();
-        }
+        }       
     }
 }

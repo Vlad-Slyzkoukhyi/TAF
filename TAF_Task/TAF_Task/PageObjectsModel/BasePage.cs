@@ -11,7 +11,7 @@ using OpenQA.Selenium.DevTools.V126.Network;
 using SeleniumExtras.WaitHelpers;
 using Microsoft.Extensions.Configuration;
 using System.Configuration;
-using log4net.Config;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using log4net;
 
 namespace TAF_Task.PageObjectsModel
@@ -21,60 +21,118 @@ namespace TAF_Task.PageObjectsModel
         protected IWebDriver Driver;
         protected WebDriverWait Wait;
         protected IConfiguration? Configuration;
-        protected ILog Log => LogManager.GetLogger(this.GetType());        
-
-        private readonly By _acceptCookie = By.Id("onetrust-accept-btn-handler");
+        protected ILog Log => LogManager.GetLogger(this.GetType());
 
         protected BasePage(IWebDriver driver) 
         {
             Driver = driver;
             PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-        }
-        protected BasePage(IWebDriver driver, IConfiguration? configuration)
-        {
-            Driver = driver;
-            Configuration = configuration;
-            PageFactory.InitElements(Driver, this);
-            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-        }
+            Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        }        
 
-        public void AcceptCookieButton()
+        private readonly By _acceptCookie = By.Id("onetrust-accept-btn-handler");
+
+        public void AcceptCookieIfPresent()
         {
             try
             {
-                Wait.Until(ExpectedConditions.ElementIsVisible(_acceptCookie));
-                Wait.Until(ExpectedConditions.ElementToBeClickable(_acceptCookie));
-
-                IWebElement acceptCookieButton = Driver.FindElement(_acceptCookie);
-                if (acceptCookieButton != null)
+                WaitUntilElementIsVisibleByLocator(_acceptCookie);
+                if (Driver.FindElement(_acceptCookie).Displayed)
                 {
-                    acceptCookieButton.Click();
-                    Log.Info("Cookie Accepted.");
-                }
-                else
-                {
-                    Log.Info("Cookie Accept button is not found."); 
+                    Log.Info("Press Accept cookie");
+                    ClickElementJS(_acceptCookie);
+                    Log.Info("Cookie accepted");
                 }
             }
-            catch (WebDriverTimeoutException ex)
+            catch (NoSuchElementException)
             {
-                Log.Info($"Cookie dialog did not appear within the expected time: {ex.Message}");
+                Log.Info("Cookie is not exist");
+                // Element not found, no action needed
             }
         }
 
-        public void ClickJS(IWebElement? element)
+        public void ClickElement(By locator)
         {
-            Driver.ExecuteJavaScript("arguments[0].click();", element);
-        }
-        public void ScroolJS(IWebElement? element)
-        {
-            Driver.ExecuteJavaScript("arguments[0].scrollIntoView(true);", element);
+            Wait.Until(ExpectedConditions.ElementToBeClickable(locator));
+            IWebElement element = Driver.FindElement(locator);
+            element.Click();
         }
 
-        public void ScroolJSTillTheEnd()
+        public void ClickElement(IWebElement element)
         {
-            Driver.ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+            Wait.Until(ExpectedConditions.ElementToBeClickable(element));
+            element?.Click();
+        }
+
+        public async Task ClickElementWithDelayAfterClicking(By locator)
+        {
+            IWebElement element = Wait.Until(ExpectedConditions.ElementToBeClickable(Driver.FindElement(locator)));
+            element.Click();
+            await Task.Delay(1000);
+        }
+
+        public void ClickElementJS(By locator)
+        {
+            IWebElement element = Driver.FindElement(locator);
+            Wait.Until(ExpectedConditions.ElementToBeClickable(element));
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+        }
+
+        public void ClickElementJS(IWebElement element)
+        {
+            Wait.Until(ExpectedConditions.ElementToBeClickable(element));
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+        }
+
+        public void SendKeys(By locator, string keyword)
+        {
+            Wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            IWebElement element = Driver.FindElement(locator);
+            element.Clear();
+            element.SendKeys(keyword);
+        }
+
+        public string GetText(By locator)
+        {
+            Wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            IWebElement element = Driver.FindElement(locator);
+            return element.Text.Trim();
+        }
+
+        public void ScroolJS(By locator)
+        {
+            Wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            IWebElement element = Driver.FindElement(locator);
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView(true);", element);
+        }
+
+        public void ScrollJSTillTheEnd()
+        {
+            ((IJavaScriptExecutor)Driver).ExecuteScript("window.scrollTo(0, document.body.scrollHeight);");
+        }
+
+        public void WaitUntilAllElementsIsPresentByLocator(By locator)
+        {
+            Wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(locator));
+        }
+
+        public void WaitUntilElementIsVisibleByLocator(By locator)
+        {
+            Wait.Until(ExpectedConditions.ElementIsVisible(locator));
+        }
+
+        public IWebElement GetElement(By locator)
+        {
+            Wait.Until(ExpectedConditions.ElementExists(locator));
+            IWebElement element = Driver.FindElement(locator);
+            return element;
+        }
+
+        public IList<IWebElement> GetElements(By locator)
+        {
+            Wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            IList<IWebElement> elements = Driver.FindElements(locator);
+            return elements;
         }
     }
 }
