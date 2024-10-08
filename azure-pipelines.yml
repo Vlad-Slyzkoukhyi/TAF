@@ -89,6 +89,8 @@ jobs:
           BROWSER: ${{ parameters.browser }}
           SCREENSHOTS_PATH: $(Build.ArtifactStagingDirectory)\Screenshots
         displayName: 'Test UI Project'
+      - script: dir "$(Build.ArtifactStagingDirectory)\Screenshots"
+        displayName: 'List Screenshots Directory'
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
@@ -97,14 +99,14 @@ jobs:
       - task: PublishBuildArtifacts@1
         condition: always()
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\Downloads'
+          PathToPublish: '$(Build.ArtifactStagingDirectory)\Downloads'
           ArtifactName: 'DownloadedFiles'
           publishLocation: 'container'
         displayName: 'Publish Downloaded Files as Artifacts'
       - task: PublishBuildArtifacts@1
         condition: always()
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\Screenshots'
+          PathToPublish: '$(Build.ArtifactStagingDirectory)\Screenshots'
           ArtifactName: 'UITestScreenshots'
           publishLocation: 'container'
         displayName: 'Publish Screenshots as Artifacts'
