@@ -1,13 +1,3 @@
-parameters:
-  - name: browser
-    displayName: 'Browser for UI tests'
-    type: string
-    default: 'chrome'
-    values:
-    - chrome
-    - firefox
-    - edge
-
 trigger:
   branches:
     include:
@@ -29,6 +19,16 @@ schedules:
 pool:
   vmImage: 'windows-latest'
 
+parameters:
+  - name: browser
+    displayName: 'Browser for UI tests'
+    type: string
+    default: 'chrome'
+    values:
+    - chrome
+    - firefox
+    - edge
+
 variables:
   buildConfiguration: 'Release'
 
@@ -38,17 +38,17 @@ jobs:
     steps:
       - task: UseDotNet@2
         inputs:
-          version: '8.0.x'
+          version: '8.0.x' # Adjust .NET version as per your requirement
           packageType: 'sdk'
       - task: UseDotNet@2
         inputs:
           version: '8.0.x'
           packageType: 'runtime'
-      - script: dotnet restore TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj
+      - script: dotnet restore TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj
         displayName: 'Restore API Packages'
-      - script: dotnet build TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration)
+      - script: dotnet build TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration)
         displayName: 'Build API Project'
-      - script: dotnet test TAF_Task/TAF_Task_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
+      - script: dotnet test TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
         displayName: 'Test API Project'
       - task: PublishTestResults@2
         inputs:
@@ -61,8 +61,9 @@ jobs:
     dependsOn: APITests
     condition: succeededOrFailed()
     steps:
-      - script: mkdir -p "$(Build.ArtifactStagingDirectory)/Screenshots"
-                mkdir -p "$(Build.ArtifactStagingDirectory)/Downloads"
+      - script: |
+          mkdir "$(Build.ArtifactStagingDirectory)\Screenshots"
+          mkdir "$(Build.ArtifactStagingDirectory)\Downloads"
         displayName: 'Create Directories'
       - task: UseDotNet@2
         inputs:
@@ -72,36 +73,31 @@ jobs:
         inputs:
           version: '8.0.x'
           packageType: 'runtime'
-      - script: dotnet restore TAF_Task/TAF_Task/TAF_Task.csproj
+      - script: dotnet restore TAF_Task/TAF_Task/TAF_UI.csproj
         displayName: 'Restore UI Packages'
-      - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration)
+      - script: dotnet build TAF_Task/TAF_Task/TAF_UI.csproj --configuration $(buildConfiguration)
         displayName: 'Build UI Project'
-      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx"
-        displayName: 'Test UI Project'
+      - script: dotnet test TAF_Task/TAF_Task/TAF_UI.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx"
         env:
           UI_TEST: true
           BROWSER: ${{ parameters.browser }}
-          SCREENSHOTS_PATH: $(Build.ArtifactStagingDirectory)/Screenshots
+          SCREENSHOTS_PATH: $(Build.ArtifactStagingDirectory)\Screenshots
+        displayName: 'Test UI Project'
       - task: PublishTestResults@2
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/ui_test_results.trx'
         displayName: 'Publish UI Test Results'
-        
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Downloads'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\Downloads'
           ArtifactName: 'DownloadedFiles'
           publishLocation: 'container'
         displayName: 'Publish Downloaded Files as Artifacts'
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Screenshots'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\Screenshots'
           ArtifactName: 'UITestScreenshots'
           publishLocation: 'container'
         condition: succeededOrFailed()
         displayName: 'Publish Screenshots as Artifacts'
-      - upload: '**/Screenshots'
-        condition: succeeded()
-        displayName: 'Upload Screenshots'
-        artifact: Screenshots
