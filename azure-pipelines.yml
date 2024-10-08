@@ -38,7 +38,7 @@ jobs:
     steps:
       - task: UseDotNet@2
         inputs:
-          version: '8.0.x' # Confirm the version numbers
+          version: '8.0.x'
           packageType: 'sdk'
       - task: UseDotNet@2
         inputs:
@@ -61,12 +61,10 @@ jobs:
     dependsOn: APITests
     condition: succeededOrFailed()
     steps:
-
       - powershell: |
           New-Item -ItemType Directory -Path "$(Build.ArtifactStagingDirectory)\Screenshots" -Force
           New-Item -ItemType Directory -Path "$(Build.ArtifactStagingDirectory)\Downloads" -Force
         displayName: 'Create Directories'
-
       - powershell: |
           if (Test-Path "$(Build.ArtifactStagingDirectory)\Screenshots") {
             Write-Host "Screenshots directory created successfully."
@@ -74,7 +72,6 @@ jobs:
             Write-Error "Failed to create Screenshots directory."
             exit 1
           }
-          
           if (Test-Path "$(Build.ArtifactStagingDirectory)\Downloads") {
             Write-Host "Downloads directory created successfully."
           } else {
@@ -84,7 +81,7 @@ jobs:
         displayName: 'Check Directories Creation'
       - task: UseDotNet@2
         inputs:
-          version: '8.0.x' 
+          version: '8.0.x'
           packageType: 'sdk'
       - task: UseDotNet@2
         inputs:
@@ -94,7 +91,7 @@ jobs:
         displayName: 'Restore UI Packages'
       - script: dotnet build TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration)
         displayName: 'Build UI Project'
-      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx"
+      - script: dotnet test TAF_Task/TAF_Task/TAF_Task.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=ui_test_results.trx" --verbosity normal
         env:
           UI_TEST: true
           BROWSER: ${{ parameters.browser }}
@@ -106,15 +103,16 @@ jobs:
           testResultsFiles: '**/ui_test_results.trx'
         displayName: 'Publish UI Test Results'
       - task: PublishBuildArtifacts@1
+        condition: always()
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)\Downloads'
           ArtifactName: 'DownloadedFiles'
           publishLocation: 'container'
         displayName: 'Publish Downloaded Files as Artifacts'
       - task: PublishBuildArtifacts@1
+        condition: always()
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)\Screenshots'
           ArtifactName: 'UITestScreenshots'
           publishLocation: 'container'
-        condition: and(succeededOrFailed(), ne(variables['Build.Repository.Clean'], 'false'))
         displayName: 'Publish Screenshots as Artifacts'
