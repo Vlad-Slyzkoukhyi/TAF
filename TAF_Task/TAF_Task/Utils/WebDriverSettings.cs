@@ -8,8 +8,10 @@ namespace TAF_Task.Utils
 {
     public class WebDriverSettings
     {
-        public string? BrowserType { get; set; }
+        public string BrowserType { get; set; }
         public bool Headless { get; set; }
         public bool MaximizeWindow { get; set; }
+        public bool PromptForDownload { get; set; }
+        public bool DisablePopupBlocking { get; set; }
     }
 }
