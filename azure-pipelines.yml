@@ -40,11 +40,11 @@ jobs:
         inputs:
           version: '8.0.x'
           packageType: 'sdk'      
-      - script: dotnet restore TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj
+      - script: dotnet restore TAF_Task/TAF_API/TAF_API.csproj
         displayName: 'Restore API Packages'
-      - script: dotnet build TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration)
+      - script: dotnet build TAF_Task/TAF_API/TAF_API.csproj --configuration $(buildConfiguration)
         displayName: 'Build API Project'
-      - script: dotnet test TAF_Task/TAF_Task_API/TAF_API/TAF_API/TAF_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
+      - script: dotnet test TAF_Task/TAF_API/TAF_API.csproj --configuration $(buildConfiguration) --logger "trx;LogFileName=api_test_results.trx"
         displayName: 'Test API Project'
       - task: PublishTestResults@2
         inputs:
