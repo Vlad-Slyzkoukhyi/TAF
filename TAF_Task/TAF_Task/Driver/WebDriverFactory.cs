@@ -22,6 +22,10 @@ namespace TAF_Task.Driver
             {
                 case BrowserType.Chrome:
                     var options = new ChromeOptions();
+                    string basePath = Environment.GetEnvironmentVariable("BUILD_ARTIFACTSTAGINGDIRECTORY") ?? Directory.GetCurrentDirectory();
+                    string downloadPath = Path.Combine(basePath, "Downloads");
+                    Directory.CreateDirectory(downloadPath);
+                    options.AddUserProfilePreference("download.default_directory", downloadPath);
                     options.AddUserProfilePreference("download.default_directory", configuration["AppSettings:DownloadDirectory"]);
                     options.AddUserProfilePreference("download.prompt_for_download", false);
                     options.AddUserProfilePreference("disable-popup-blocking", "true");

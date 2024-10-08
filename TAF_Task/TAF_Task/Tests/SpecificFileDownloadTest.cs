@@ -33,8 +33,8 @@ namespace TAF_Task.Tests
                 .ScrollIntoViewDownloadEPAMAtGlance()
                 .ClickDownloadEPAMAtGlance();
 
-            string downloadDirectory = _configuration["AppSettings:DownloadDirectory"];
-            string fullPathToFile = Path.Combine(downloadDirectory, fileName);
+            string downloadPath = Environment.GetEnvironmentVariable("DOWNLOAD_PATH") ?? _configuration["AppSettings:DownloadDirectory"];
+            string fullPathToFile = Path.Combine(downloadPath, fileName);
 
             await FileHelper.WaitForFileDownload(fullPathToFile);
             _assertions.AssertFileDownloaded(fullPathToFile);
