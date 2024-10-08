@@ -21,7 +21,10 @@ namespace TAF_Task.Driver
             switch (browserType)
             {
                 case BrowserType.Chrome:
-                    var options = new ChromeOptions();                    
+                    var options = new ChromeOptions();
+                    options.AddUserProfilePreference("download.default_directory", configuration["AppSettings:DownloadDirectory"]);
+                    options.AddUserProfilePreference("download.prompt_for_download", false);
+                    options.AddUserProfilePreference("disable-popup-blocking", "true");
                     if (settings.Headless)
                         options.AddArguments("--headless");
                     if (settings.MaximizeWindow)
