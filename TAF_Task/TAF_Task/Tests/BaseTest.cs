@@ -48,16 +48,14 @@ namespace TAF_Task.Tests
             {
                 if (TestContext.CurrentContext.Result.Outcome != ResultState.Success)
                 {
-                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName,
-                                   Path.Combine(TestContext.CurrentContext.TestDirectory,
-                                                ScreenshotTaker.ScreenShotPath));
+                    string screenshotsPath = Path.Combine(System.IO.Path.GetTempPath(), "Screenshots");
+                    SaveScreenshot(TestContext.CurrentContext.Test.MethodName, screenshotsPath);
                 }
             }
             finally
             {
                 Log.Info("Browser closed");
                 Driver?.Dispose();
-                Driver?.Quit();
             }
         }
 

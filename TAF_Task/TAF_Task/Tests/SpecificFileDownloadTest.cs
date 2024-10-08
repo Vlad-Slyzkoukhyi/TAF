@@ -28,6 +28,7 @@ namespace TAF_Task.Tests
         public async Task TestCheckFileDownload(string fileName)
         {
             _homePage.AcceptCookieIfPresent();
+            _homePage.ClickMenuButton();
             _homePage.NavigateToAboutPage()
                 .ScrollIntoViewDownloadEPAMAtGlance()
                 .ClickDownloadEPAMAtGlance();

@@ -29,6 +29,7 @@ namespace TAF_Task.Tests
         public void TestCheckLatestJob(string programingLanguage, string location)
         {
             _homePage.AcceptCookieIfPresent();
+            _homePage.ClickMenuButton();
             CareersPage _careersPage = _homePage.NavigateToCareersPage()
                 .SearchJobByKeyword(programingLanguage)
                 .SearchJobByLocation(location)

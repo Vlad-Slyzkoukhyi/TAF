@@ -26,6 +26,7 @@ namespace TAF_Task.Tests
         public async Task TestCheckArticleName()
         {
             _homePage.AcceptCookieIfPresent();
+            _homePage.ClickMenuButton();
             InsightsPage _insightsPage = _homePage.NavigateToInsightsPage();
             _insightsPage = await _insightsPage.SwipeCaruselRight();
             _insightsPage = await _insightsPage.SwipeCaruselRight();

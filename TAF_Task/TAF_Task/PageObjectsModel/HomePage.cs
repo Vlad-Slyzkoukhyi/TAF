@@ -13,14 +13,17 @@ namespace TAF_Task.PageObjectsModel
         {
             PageFactory.InitElements(driver, this);
         }
+
+        [FindsBy(How = How.ClassName, Using = "hamburger-menu__button")]
+        private readonly IWebElement _menuButton;
         
-        [FindsBy(How = How.LinkText, Using = "Careers")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Careers']")]
         private readonly IWebElement _careersPage;
 
-        [FindsBy(How = How.LinkText, Using = "About")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='About']")]
         private readonly IWebElement _aboutPage;
 
-        [FindsBy(How = How.LinkText, Using = "Insights")]
+        [FindsBy(How = How.XPath, Using = "//a[@class='hamburger-menu__link first-level-link gradient-text'][normalize-space()='Insights']")]
         private readonly IWebElement _insightsPage;
 
         [FindsBy(How = How.CssSelector, Using = ".search-icon.dark-icon.header-search__search-icon")]
@@ -34,7 +37,14 @@ namespace TAF_Task.PageObjectsModel
 
         [FindsBy(How = How.ClassName, Using = "search-results__item")]
         private readonly IList<IWebElement> _searchRequestWordResult;
-        
+
+        public HomePage ClickMenuButton()
+        {
+            Wait.Until(ExpectedConditions.ElementToBeClickable(_menuButton));
+            Log.Info("Click menu button");
+            _menuButton.Click();
+            return this;
+        }
         public CareersPage NavigateToCareersPage()
         {
             Wait.Until(ExpectedConditions.ElementToBeClickable(_careersPage));
